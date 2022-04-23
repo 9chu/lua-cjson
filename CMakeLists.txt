@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 2.6)
 option(USE_INTERNAL_FPCONV "Use internal strtod() / g_fmt() code for performance")
 option(MULTIPLE_THREADS "Support multi-threaded apps with internal fpconv - recommended" ON)
 option(STATIC_LINK "Build as a static library" OFF)
+option(ENABLE_CJSON_GLOBAL "Export CJSON to global" OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -18,6 +19,10 @@ endif()
 
 find_package(Lua REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
+
+if(ENABLE_CJSON_GLOBAL)
+    add_definitions(-DENABLE_CJSON_GLOBAL)
+endif()
 
 if(NOT USE_INTERNAL_FPCONV)
     # Use libc number conversion routines (strtod(), sprintf())
