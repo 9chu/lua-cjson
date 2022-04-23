@@ -17,7 +17,9 @@ if(NOT CMAKE_BUILD_TYPE)
         FORCE)
 endif()
 
-find_package(Lua REQUIRED)
+if(NOT DEFINED LUA_INCLUDE_DIR)
+    find_package(Lua REQUIRED)
+endif()
 include_directories(${LUA_INCLUDE_DIR})
 
 if(ENABLE_CJSON_GLOBAL)
