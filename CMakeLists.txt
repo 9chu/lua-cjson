@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 2.6)
 
 option(USE_INTERNAL_FPCONV "Use internal strtod() / g_fmt() code for performance")
 option(MULTIPLE_THREADS "Support multi-threaded apps with internal fpconv - recommended" ON)
+option(STATIC_LINK "Build as a static library" OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -60,7 +61,9 @@ endif()
 
 if(WIN32)
     # Win32 modules need to be linked to the Lua library.
-    set(_MODULE_LINK ${LUA_LIBRARY} ${_MODULE_LINK})
+    if(NOT STATIC_LINK)
+        set(_MODULE_LINK ${LUA_LIBRARY} ${_MODULE_LINK})
+    endif()
     set(_lua_module_dir "${_lua_lib_dir}")
     # Windows sprintf()/strtod() handle NaN/inf differently. Not supported.
     add_definitions(-DDISABLE_INVALID_NUMBERS)
@@ -68,7 +71,11 @@ else()
     set(_lua_module_dir "${_lua_lib_dir}/lua/5.1")
 endif()
 
-add_library(cjson MODULE lua_cjson.c strbuf.c ${FPCONV_SOURCES})
+if(STATIC_LINK)
+    add_library(cjson STATIC lua_cjson.c strbuf.c ${FPCONV_SOURCES})
+else()
+    add_library(cjson MODULE lua_cjson.c strbuf.c ${FPCONV_SOURCES})
+endif()
 set_target_properties(cjson PROPERTIES PREFIX "")
 target_link_libraries(cjson ${_MODULE_LINK})
 install(TARGETS cjson DESTINATION "${_lua_module_dir}")
